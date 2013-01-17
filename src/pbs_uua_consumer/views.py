@@ -1,3 +1,4 @@
+import functools
 import re
 import urllib
 from urlparse import urlsplit
@@ -85,6 +86,16 @@ def render_response(request, message=None, status=200, template_name='openid/res
     return HttpResponse(response, status=status)
 
 
+def ie_iframe_hack(view):
+    @functools.wraps(view)
+    def wrapper(request, *args, **kwargs):
+        response = view(request, *args, **kwargs)
+        response["P3P"] = 'CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT"'
+        return response
+    return wrapper
+
+
+
 def parse_openid_response(request):
     """Parse an OpenID response from a Django request."""
     current_url = request.build_absolute_uri()
@@ -155,6 +166,7 @@ def login_begin(request, popup_mode=1, template_name='openid/login.html',
     return render_openid_request(request, openid_request, return_to)
 
 
+@ie_iframe_hack
 def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME):
     """ Handle the OpenId response"""
     redirect_to = request.REQUEST.get(redirect_field_name, '')
