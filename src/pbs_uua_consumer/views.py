@@ -10,12 +10,11 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.shortcuts import render_to_response
 
 from openid.consumer.consumer import (
     Consumer, SUCCESS, CANCEL, FAILURE)
 from openid.consumer.discover import DiscoveryFailure
-from openid.extensions import sreg, pape
+from openid.extensions import sreg
 
 from pbs_uua_consumer.store import DjangoOpenIDStore
 from pbs_uua_consumer.extensions import UIExtension, SignatureVerification
@@ -93,7 +92,6 @@ def ie_iframe_hack(view):
         response["P3P"] = 'CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT"'
         return response
     return wrapper
-
 
 
 def parse_openid_response(request):
