@@ -167,7 +167,8 @@ def login_begin(request, popup_mode=1, template_name='openid/login.html',
 @ie_iframe_hack
 def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME):
     """ Handle the OpenId response"""
-    redirect_to = request.REQUEST.get(redirect_field_name, '')
+    redirect_to_raw = request.REQUEST.get(redirect_field_name, '')
+    redirect_to = sanitise_redirect_url(redirect_to_raw)
     to_admin = int(request.REQUEST.get('to_admin', 0))
     openid_response = parse_openid_response(request)
     if not openid_response:
@@ -185,19 +186,23 @@ def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME):
                 # login the user
                 auth_login(request, user)
                 if popup:
-                    return render_response(request, status=200, redirect_to=sanitise_redirect_url(redirect_to))
+                    return render_response(request, status=200,
+                                           redirect_to=redirect_to)
                 else:
-                    return HttpResponseRedirect(redirect_to=sanitise_redirect_url(redirect_to))
+                    return HttpResponseRedirect(redirect_to=redirect_to)
             else:
-                return render_response(request, 'Disabled account')
+                return render_response(request, 'Disabled account',
+                                       redirect_to=redirect_to)
         else:
-            return render_response(request, 'Unknown user')
+            return render_response(request, 'Unknown user',
+                                   redirect_to=redirect_to)
     elif openid_response.status == FAILURE:
         return render_response(
             request, 'OpenID authentication failed: %s' %
-            openid_response.message)
+            openid_response.message, redirect_to=redirect_to)
     elif openid_response.status == CANCEL:
-        return render_response(request, 'Authentication cancelled')
+        return render_response(request, 'Authentication cancelled',
+                               redirect_to=redirect_to)
     else:
         assert False, (
             "Unknown OpenID response type: %r" % openid_response.status)

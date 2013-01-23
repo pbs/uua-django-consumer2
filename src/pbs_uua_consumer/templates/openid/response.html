@@ -6,20 +6,20 @@
 <script type="text/javascript" src="{{ sso_js_url }}popup.js"></script>
 {% if popup_mode %}
 <script>
+  var redirect_path = "{{ redirect_to }}";
     {% if message %}
         (function($) {
             $(document).ready(function() {
                 $.showMessage("{{ message|escape }}", {
                     backgroundColor: '#338ED4',
                     callback: function() {
-                        // Reload the parent
-                        parent.location.reload();
+                        parent.location = redirect_path;
                     }
                 });
             });
         })(jQuery);
     {% else %}
-        parent.location = '{{ redirect_to }}';
+        parent.location = redirect_path;
     {% endif %}
 </script>
 {% else %}
