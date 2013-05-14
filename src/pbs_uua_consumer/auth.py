@@ -39,17 +39,16 @@ class OpenIDBackend:
         except UserOpenID.DoesNotExist:
             if getattr(settings, 'OPENID_CREATE_USERS', False):
                 user = self.create_user_from_openid(openid_response)
+                if getattr(settings, 'OPENID_UPDATE_DETAILS_FROM_SREG', False):
+                    sreg_response = sreg.SRegResponse.fromSuccessResponse(
+                    openid_response)
+                    if sreg_response:
+                        self.update_user_details_from_sreg(user, sreg_response)
         else:
             user = user_openid.user
 
         if user is None:
             return None
-
-        if getattr(settings, 'OPENID_UPDATE_DETAILS_FROM_SREG', False):
-            sreg_response = sreg.SRegResponse.fromSuccessResponse(
-                openid_response)
-            if sreg_response:
-                self.update_user_details_from_sreg(user, sreg_response)
 
         return user
 
